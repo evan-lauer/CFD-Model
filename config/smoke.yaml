@@ -1,0 +1,44 @@
+simulation:
+  step_size_seconds: 3600
+  total_duration_seconds: 7200
+  ensemble_size: 3
+  random_seed: 1
+
+components:
+  velocity:
+    type: cmems
+    u_path: ./data/currents/cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m_1706987874202.nc
+    v_path: ./data/currents/cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m_1706987874202.nc
+    w_path: ./data/currents/cmems_mod_glo_phy-wcur_anfc_0.083deg_P1D-m_1706987903452.nc
+
+  diffusion:
+    type: isotropic
+    Kh: 0.0
+    Kv: 0.0
+
+  error:
+    rmse_h: 0.0
+    rmse_v: 0.0
+    tau_seconds: 0
+
+  vertical:
+    z0_m: 3450.0
+    tau_seconds: 7200
+    use_water_w: false
+
+  ocean_mask:
+    type: gebco
+    path: ./data/bathymetry/target_area_bathymetry.nc
+
+starts:
+  base:
+    {
+      latitude_degrees: 38.0772144,
+      longitude_degrees: 19.8620142,
+      depth_meters: 3450.0,
+    }
+  jitter_depth_meters: 0.0
+
+visualization:
+  interactive_3d: false
+  save_static: true

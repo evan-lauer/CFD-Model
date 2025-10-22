@@ -1,7 +1,7 @@
 from __future__ import annotations
 import numpy as np
 import netCDF4 as nc
-from components.core import OceanMask
+from core import OceanMask
 
 
 class BathymetryOceanMask(OceanMask):

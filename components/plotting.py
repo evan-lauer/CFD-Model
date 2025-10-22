@@ -1,11 +1,9 @@
 from __future__ import annotations
-
-from typing import Optional, Sequence, Tuple
-
-import matplotlib.pyplot as plt
+from typing import Optional, Tuple
 import numpy as np
+import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
-from mpl_toolkits.mplot3d.axes3d import Axes3D  # type: ignore
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 
 def plot_topdown_paths(
@@ -14,19 +12,12 @@ def plot_topdown_paths(
     figure_size: Tuple[int, int] = (8, 6),
     axes: Optional[Axes] = None,
 ) -> Axes:
-    """
-    Plot lon/lat traces for an ensemble.
-    coordinates_ensemble shape: (ensemble, num_steps, 3) with [lat, lon, depth].
-    """
     if axes is None:
         fig, axes = plt.subplots(figsize=figure_size)
-
-    # At this point, axes is guaranteed to be an Axes
     for i in range(coordinates_ensemble.shape[0]):
         lat = coordinates_ensemble[i, :, 0]
         lon = coordinates_ensemble[i, :, 1]
-        axes.plot(lon, lat, linewidth=1.0)
-
+        axes.plot(lon, lat, linewidth=1)
     axes.set_xlabel("Longitude")
     axes.set_ylabel("Latitude")
     if show_legend:
@@ -38,22 +29,15 @@ def plot_topdown_paths(
 
 def plot_3d_paths(
     coordinates_ensemble: np.ndarray,
-    figure_size: Tuple[int, int] = (9, 7),
+    figure_size: Tuple[int, int] = (10, 8),
     axes_3d: Optional[Axes3D] = None,
     show_start_end_markers: bool = True,
     linewidth: float = 1.0,
 ) -> Axes3D:
-    """
-    3D plot of trajectories: x=longitude, y=latitude, z=depth (inverted).
-    coordinates_ensemble shape: (ensemble, num_steps, 3) with [lat, lon, depth]
-    """
     if axes_3d is None:
         fig = plt.figure(figsize=figure_size)
-        # type: ignore[assignment]
-        axes_3d = fig.add_subplot(111, projection="3d")
-
-    # mypy: Axes3D returned by add_subplot with projection="3d"
-    assert isinstance(axes_3d, Axes3D)
+        axes_3d = fig.add_subplot(111, projection="3d")  # type: ignore[assignment]
+        # mypy doesn't know add_subplot returns Axes3D when projection="3d"
 
     for i in range(coordinates_ensemble.shape[0]):
         lat = coordinates_ensemble[i, :, 0]
@@ -68,27 +52,5 @@ def plot_3d_paths(
     axes_3d.set_xlabel("Longitude")
     axes_3d.set_ylabel("Latitude")
     axes_3d.set_zlabel("Depth (m)")
+    axes_3d.grid(True)
     return axes_3d
-
-
-def save_3d_views(
-    axes_3d: Axes3D,
-    output_directory: str,
-    basename: str,
-    views: Sequence[Tuple[float, float]] = ((5, 90), (5, 0), (45, 45), (90, 90)),
-) -> None:
-    """
-    Saves multiple viewpoint images for a 3D axes.
-    views items are (elev, azim) pairs.
-    """
-    import os
-
-    if not os.path.exists(output_directory):
-        os.makedirs(output_directory)
-
-    for idx, (elev, azim) in enumerate(views):
-        axes_3d.view_init(elev=elev, azim=azim)
-        axes_3d.figure.savefig(
-            f"{output_directory}/{basename}_view{idx + 1}_{int(elev)}_{int(azim)}.png",
-            bbox_inches="tight",
-        )

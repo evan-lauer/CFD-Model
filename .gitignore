@@ -2,3 +2,7 @@ __pycache__/
 .vscode/
 util/__pycache__/
 .venv/
+runs/
+.ruff_cache/
+.mypy_cache/
+cfd_demo.egg-info/

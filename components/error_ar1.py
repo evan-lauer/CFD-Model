@@ -2,7 +2,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.random import Generator
 from typing import Dict
-from components.core import SimulationConfig, ErrorModel
+from core import SimulationConfig, ErrorModel
 
 
 class AR1VelocityErrorModel(ErrorModel):
