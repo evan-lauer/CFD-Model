@@ -6,3 +6,8 @@ runs/
 .ruff_cache/
 .mypy_cache/
 cfd_demo.egg-info/
+
+config/*
+# Default configs to include
+!config/default.yaml
+!config/smoke.yaml

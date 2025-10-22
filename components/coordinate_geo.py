@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Tuple
 import numpy as np
-from core import CoordinateConverter
+from components.core import CoordinateConverter
 
 
 class GeodesicCoordinateConverter(CoordinateConverter):

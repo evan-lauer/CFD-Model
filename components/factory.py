@@ -7,11 +7,11 @@ import numpy as np
 from .core import SimulationConfig, StartCondition, Integrator
 
 # Import concrete implementations
-from .velocity_cmems import CMEMSVelocityModel
-from .diffusion_isotropic import IsotropicGaussianDiffusion
-from .error_ar1 import AR1VelocityErrorModel
-from .coordinate_geo import GeodesicCoordinateConverter
-from .ocean_mask_bathy import BathymetryOceanMask
+from components.velocity_cmems import CMEMSVelocityModel
+from components.diffusion_isotropic import IsotropicGaussianDiffusion
+from components.error_ar1 import AR1VelocityErrorModel
+from components.coordinate_geo import GeodesicCoordinateConverter
+from components.ocean_mask_bathy import BathymetryOceanMask
 
 # # Optional vertical controller (if you added it) TODO: Do i want this?
 # try:

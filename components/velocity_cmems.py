@@ -2,7 +2,7 @@ from __future__ import annotations
 import numpy as np
 import netCDF4 as nc
 from typing import Optional
-from core import SimulationConfig, VelocityModel
+from components.core import SimulationConfig, VelocityModel
 
 
 class CMEMSVelocityModel(VelocityModel):

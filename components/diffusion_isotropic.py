@@ -1,7 +1,7 @@
 from __future__ import annotations
 import numpy as np
 from numpy.random import Generator
-from core import SimulationConfig, DiffusionModel
+from components.core import SimulationConfig, DiffusionModel
 
 
 class IsotropicGaussianDiffusion(DiffusionModel):
