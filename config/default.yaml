@@ -44,5 +44,5 @@ starts:
   jitter_depth_meters: 10.0
 
 visualization:
-  interactive_3d: true
+  interactive_3d: false
   save_static: true

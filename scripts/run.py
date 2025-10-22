@@ -16,6 +16,7 @@ from components.factory import (
     build_start_conditions,
 )
 from components.plotting import plot_topdown_paths, plot_3d_paths
+from components.parallel_process import run_ensemble_pool
 import matplotlib.pyplot as plt
 import sys
 import subprocess
@@ -67,6 +68,9 @@ def run(
     no_save: bool = typer.Option(
         False, help="Skip saving static plots and artifacts (for quick dev runs)"
     ),
+    jobs: int = typer.Option(
+        0, "--jobs", "-j", help="Parallel workers (0 = use all cores)"
+    ),
 ):
     cfg = load_yaml(config_path)
 
@@ -94,7 +98,19 @@ def run(
     runner.initialize(sim_cfg)
 
     t0 = time.time()
-    coords, beached = runner.run_ensemble(starts)
+    if jobs == 1:
+        # fast in-process path
+        integrator = build_integrator(cfg)
+        runner = SimulationRunner(integrator)
+        runner.initialize(sim_cfg)
+        coords, beached = runner.run_ensemble(starts)
+    else:
+        coords, beached = run_ensemble_pool(
+            sim_cfg=sim_cfg,
+            cfg_dict=cfg,
+            starts=starts,
+            n_jobs=(None if jobs <= 0 else jobs),
+        )
     t1 = time.time()
 
     # Save artifacts
@@ -134,6 +150,7 @@ def run(
             "config_sha": sha1_of_dict(cfg),
             "interactive_3d": interactive,
             "environment": env_meta,
+            "jobs": jobs,
             "seed": sim_cfg.random_seed,
         }
         write_json(outdir / "metadata.json", meta)

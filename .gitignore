@@ -5,6 +5,7 @@ util/__pycache__/
 runs/
 .ruff_cache/
 .mypy_cache/
+.cache/
 cfd_demo.egg-info/
 
 config/*
