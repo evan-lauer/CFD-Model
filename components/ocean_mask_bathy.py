@@ -34,10 +34,7 @@ class BathymetryOceanMask(OceanMask):
         return i if abs(grid[i] - value) < abs(grid[i - 1] - value) else i - 1
 
     def is_valid_ocean(
-        self,
-        latitude_degrees: float,
-        longitude_degrees: float,
-        depth_meters: float
+        self, latitude_degrees: float, longitude_degrees: float, depth_meters: float
     ) -> bool:
         if (
             self.latitude_array is None
@@ -47,7 +44,12 @@ class BathymetryOceanMask(OceanMask):
             raise RuntimeError("BathymetryOceanMask not initialized")
 
         # Bounds check (same as your original version)
-        if latitude_degrees < 37 or latitude_degrees > 40 or longitude_degrees < 17.5 or longitude_degrees > 21.5:
+        if (
+            latitude_degrees < 37
+            or latitude_degrees > 40
+            or longitude_degrees < 17.5
+            or longitude_degrees > 21.5
+        ):
             raise ValueError("Location outside target area")
 
         i_lat = self._nearest_index(latitude_degrees, self.latitude_array)

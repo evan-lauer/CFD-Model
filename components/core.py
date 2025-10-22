@@ -51,8 +51,11 @@ class VelocityModel(Protocol):
     def initialize(self, config: SimulationConfig) -> None: ...
 
     def get_velocity_m_per_s(
-        self, latitude_degrees: float, longitude_degrees: float, depth_meters: float,
-        epoch_seconds: float
+        self,
+        latitude_degrees: float,
+        longitude_degrees: float,
+        depth_meters: float,
+        epoch_seconds: float,
     ) -> np.ndarray:  # [v_north, v_east, v_vertical]
         ...
 
@@ -71,8 +74,7 @@ class ErrorModel(Protocol):
 
     def velocity_perturbation_m_per_s(
         self, particle_index: int, epoch_seconds: float, rng: Generator
-    ) -> np.ndarray:
-        ...
+    ) -> np.ndarray: ...
 
 
 class OceanMask(Protocol):
@@ -119,23 +121,25 @@ class Integrator:
         particle_index: int,
         step_size_seconds: float,
         epoch_seconds: float,
-        rng: Generator
+        rng: Generator,
     ) -> ParticleState:
         v = self.velocity_model.get_velocity_m_per_s(
-            state.latitude_degrees, state.longitude_degrees, state.depth_meters, epoch_seconds
+            state.latitude_degrees,
+            state.longitude_degrees,
+            state.depth_meters,
+            epoch_seconds,
         )
         if self.error_model:
-            v = v + \
-                self.error_model.velocity_perturbation_m_per_s(
-                    particle_index, epoch_seconds, rng)
+            v = v + self.error_model.velocity_perturbation_m_per_s(
+                particle_index, epoch_seconds, rng
+            )
 
         d_north = v[0] * step_size_seconds
         d_east = v[1] * step_size_seconds
         d_vert = v[2] * step_size_seconds
 
         if self.diffusion_model:
-            kick = self.diffusion_model.sample_kick_meters(
-                step_size_seconds, rng)
+            kick = self.diffusion_model.sample_kick_meters(step_size_seconds, rng)
             d_north += kick[0]
             d_east += kick[1]
             d_vert += kick[2]
@@ -143,12 +147,12 @@ class Integrator:
         lat1, lon1 = self.coordinate_converter.add_meters_north(
             state.latitude_degrees, state.longitude_degrees, d_north
         )
-        lat2, lon2 = self.coordinate_converter.add_meters_east(
-            lat1, lon1, d_east
-        )
+        lat2, lon2 = self.coordinate_converter.add_meters_east(lat1, lon1, d_east)
         new_depth = max(0.0, state.depth_meters + d_vert)
 
-        return ParticleState(latitude_degrees=lat2, longitude_degrees=lon2, depth_meters=new_depth)
+        return ParticleState(
+            latitude_degrees=lat2, longitude_degrees=lon2, depth_meters=new_depth
+        )
 
     def run_trajectory(
         self,
@@ -156,18 +160,20 @@ class Integrator:
         particle_index: int,
         start_epoch_seconds: float,
         config: SimulationConfig,
-        rng: Generator
+        rng: Generator,
     ) -> TrajectoryRecord:
-        num_steps = int(config.total_duration_seconds //
-                        config.step_size_seconds)
+        num_steps = int(config.total_duration_seconds // config.step_size_seconds)
         coords = np.zeros((num_steps, 3), dtype=np.float64)
         state = initial_state
         epoch = start_epoch_seconds
         beached = False
 
         for s in range(num_steps):
-            coords[s] = [state.latitude_degrees,
-                         state.longitude_degrees, state.depth_meters]
+            coords[s] = [
+                state.latitude_degrees,
+                state.longitude_degrees,
+                state.depth_meters,
+            ]
 
             if self.ocean_mask and not self.ocean_mask.is_valid_ocean(
                 state.latitude_degrees, state.longitude_degrees, state.depth_meters
@@ -184,7 +190,7 @@ class Integrator:
                 particle_index=particle_index,
                 step_size_seconds=config.step_size_seconds,
                 epoch_seconds=epoch,
-                rng=rng
+                rng=rng,
             )
             state = next_state
             epoch += config.step_size_seconds
@@ -206,12 +212,12 @@ class SimulationRunner:
         self.integrator.initialize(config, self.rng)
 
     def run_ensemble(
-        self,
-        start_conditions: Iterable[StartCondition]
+        self, start_conditions: Iterable[StartCondition]
     ) -> Tuple[np.ndarray, np.ndarray]:
         assert self.config is not None and self.rng is not None
-        num_steps = int(self.config.total_duration_seconds //
-                        self.config.step_size_seconds)
+        num_steps = int(
+            self.config.total_duration_seconds // self.config.step_size_seconds
+        )
         start_time0 = self.config.start_time_epoch_seconds or 0.0
 
         start_conditions = list(start_conditions)
@@ -221,15 +227,16 @@ class SimulationRunner:
         beached_flags = np.zeros((ensemble,), dtype=bool)
 
         for i, sc in enumerate(start_conditions):
-            state = ParticleState(sc.latitude_degrees,
-                                  sc.longitude_degrees, sc.depth_meters)
+            state = ParticleState(
+                sc.latitude_degrees, sc.longitude_degrees, sc.depth_meters
+            )
             start_epoch = start_time0 + sc.start_time_offset_seconds
             record = self.integrator.run_trajectory(
                 initial_state=state,
                 particle_index=i,
                 start_epoch_seconds=start_epoch,
                 config=self.config,
-                rng=self.rng
+                rng=self.rng,
             )
             coordinates[i] = record.coordinates
             beached_flags[i] = record.is_beached

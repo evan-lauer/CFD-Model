@@ -17,7 +17,7 @@ class CMEMSVelocityModel(VelocityModel):
         depth_var: str = "depth",
         lat_var: str = "latitude",
         lon_var: str = "longitude",
-        index_offset_degrees: float = 0.0
+        index_offset_degrees: float = 0.0,
     ) -> None:
         self.u_path = u_path
         self.v_path = v_path
@@ -63,11 +63,16 @@ class CMEMSVelocityModel(VelocityModel):
         return i if abs(grid[i] - value) < abs(grid[i - 1] - value) else i - 1
 
     def get_velocity_m_per_s(
-        self, latitude_degrees: float, longitude_degrees: float, depth_meters: float,
-        epoch_seconds: float
+        self,
+        latitude_degrees: float,
+        longitude_degrees: float,
+        depth_meters: float,
+        epoch_seconds: float,
     ) -> np.ndarray:
         assert self.U is not None and self.V is not None
-        assert self.depths is not None and self.lats is not None and self.lons is not None
+        assert (
+            self.depths is not None and self.lats is not None and self.lons is not None
+        )
 
         lat_q = latitude_degrees + self.index_offset_degrees
         lon_q = longitude_degrees + self.index_offset_degrees
@@ -84,7 +89,13 @@ class CMEMSVelocityModel(VelocityModel):
         if self.W is not None:
             v_vert = -self.W[i_dep, i_lat, i_lon]  # sign to keep positive up
 
-        if np.ma.is_masked(v_north) or np.ma.is_masked(v_east) or np.ma.is_masked(v_vert):
+        if (
+            np.ma.is_masked(v_north)
+            or np.ma.is_masked(v_east)
+            or np.ma.is_masked(v_vert)
+        ):
             return np.array([0.0, 0.0, 0.0], dtype=np.float64)
 
-        return np.array([float(v_north), float(v_east), float(v_vert)], dtype=np.float64)
+        return np.array(
+            [float(v_north), float(v_east), float(v_vert)], dtype=np.float64
+        )
